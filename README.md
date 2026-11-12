@@ -187,4 +187,4 @@ Erros seguem o padrão `ProblemDetail`: `400` entrada inválida, `404` categoria
 
 ## 7. Uso de IA neste projeto
 
-Usei uma IA (Claude, da Anthropic) como **apoio** no desenvolvimento: para estruturar o projeto, gerar o código inicial e escrever os comentários e a documentação. A execução da aplicação e dos testes foi feita por mim, e o código foi estudado para que eu consiga explicar o fluxo e as decisões de arquitetura.
+Usei uma IA (Claude, da Anthropic) como **apoio** no desenvolvimento: como para revisar os código e informar possiveis falhas de segurança ou até mesmo de bugs. 
