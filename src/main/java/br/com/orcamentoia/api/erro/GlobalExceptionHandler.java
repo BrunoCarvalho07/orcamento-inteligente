@@ -49,7 +49,8 @@ public class GlobalExceptionHandler {
     /** 422: a requisição está bem formada, mas viola uma regra de negócio. */
     @ExceptionHandler(RegraDeNegocioException.class)
     public ProblemDetail aoViolarRegraDeNegocio(RegraDeNegocioException e) {
-        return problema(HttpStatus.UNPROCESSABLE_ENTITY, "Regra de negócio violada", e.getMessage());
+        // UNPROCESSABLE_CONTENT é o nome atual do 422 (UNPROCESSABLE_ENTITY está obsoleto no Spring 7).
+        return problema(HttpStatus.UNPROCESSABLE_CONTENT, "Regra de negócio violada", e.getMessage());
     }
 
     // ---- Erros de áudio e de IA ----------------------------------------------------------

@@ -8,8 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.audio.tts.TextToSpeechModel;
 import org.springframework.ai.audio.tts.TextToSpeechPrompt;
 import org.springframework.ai.audio.tts.TextToSpeechResponse;
-import org.springframework.ai.openai.OpenAiAudioSpeechOptions;
-import org.springframework.ai.openai.api.OpenAiAudioApi;
 import org.springframework.stereotype.Component;
 
 /**
@@ -17,13 +15,21 @@ import org.springframework.stereotype.Component;
  *
  * <p>Injetamos a interface portável {@link TextToSpeechModel} (e não a classe da OpenAI) para que
  * trocar de provedor de voz exija apenas outra configuração.</p>
+ *
+ * <p><b>Por que a voz é configurada no {@code application.yml}?</b> Modelo, voz, formato e tom
+ * (propriedades {@code spring.ai.openai.audio.speech.*}) são escolhas de configuração, não de lógica.
+ * Mantê-las fora do código evita depender de classes internas do provedor, que mudam entre versões do
+ * Spring AI, e permite trocar a voz sem recompilar.</p>
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 class SintetizadorOpenAi implements SintetizadorDeVoz {
 
-    /** MP3 é tocado por qualquer navegador e celular e é compacto para respostas curtas. */
+    /**
+     * MP3 é tocado por qualquer navegador e celular e é compacto para respostas curtas. Precisa
+     * estar de acordo com {@code spring.ai.openai.audio.speech.response-format} (padrão: mp3).
+     */
     private static final String TIPO_MIDIA_MP3 = "audio/mpeg";
 
     private final TextToSpeechModel modeloDeVoz;
@@ -31,17 +37,7 @@ class SintetizadorOpenAi implements SintetizadorDeVoz {
     @Override
     public AudioSintetizado sintetizar(String texto) {
         try {
-            OpenAiAudioSpeechOptions opcoes = OpenAiAudioSpeechOptions.builder()
-                    .model(OpenAiAudioApi.TtsModel.GPT_4_O_MINI_TTS.value)
-                    .voice(OpenAiAudioApi.SpeechRequest.Voice.NOVA)
-                    .responseFormat(OpenAiAudioApi.SpeechRequest.AudioResponseFormat.MP3)
-                    .speed(1.0)
-                    // "instructions" orienta o sotaque e o tom. Sem isso, o modelo pode ler texto em
-                    // português com sotaque estrangeiro.
-                    .instructions("Fale em português do Brasil, com tom cordial, claro e natural.")
-                    .build();
-
-            TextToSpeechResponse resposta = modeloDeVoz.call(new TextToSpeechPrompt(texto, opcoes));
+            TextToSpeechResponse resposta = modeloDeVoz.call(new TextToSpeechPrompt(texto));
             return new AudioSintetizado(resposta.getResult().getOutput(), TIPO_MIDIA_MP3);
         } catch (RuntimeException e) {
             log.error("Falha na síntese de voz", e);

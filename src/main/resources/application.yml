@@ -39,6 +39,14 @@ spring:
         transcription:
           # Modelo de Speech-to-Text. Alternativas documentadas: whisper-1, gpt-4o-transcribe.
           model: ${OPENAI_TRANSCRIPTION_MODEL:gpt-4o-mini-transcribe}
+        speech:
+          # Text-to-Speech: lido pelo SintetizadorOpenAi. Configurado aqui (e não no código) porque são
+          # escolhas de configuração e não de lógica.
+          model: gpt-4o-mini-tts
+          voice: nova
+          response-format: mp3
+          # Orienta sotaque e tom; sem isso o modelo pode ler português com sotaque estrangeiro.
+          instructions: Fale em português do Brasil, com tom cordial, claro e natural.
       chat:
         options:
           # Modelo que conversa e aciona as ferramentas (Tool Calling). Precisa suportar function calling.
