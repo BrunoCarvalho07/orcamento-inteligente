@@ -1,0 +1,61 @@
+# =====================================================================================
+# Configuração padrão (perfil de desenvolvimento): H2 em memória + OpenAI.
+# Para PostgreSQL, execute com:  --spring.profiles.active=postgres
+# =====================================================================================
+spring:
+  application:
+    name: orcamento-inteligente
+
+  datasource:
+    url: jdbc:h2:mem:orcamento;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      # "update" é cômodo em desenvolvimento. Em produção o esquema deve ser versionado com
+      # Flyway/Liquibase e esta opção trocada para "validate".
+      ddl-auto: update
+    # Desligado de propósito: com open-in-view=true o Hibernate manteria a sessão aberta durante a
+    # renderização da resposta HTTP, escondendo lazy loading acidental na camada web. Nossa API só
+    # devolve DTOs, então não precisamos disso.
+    open-in-view: false
+
+  servlet:
+    multipart:
+      # Um comando de voz típico tem alguns segundos (poucas centenas de KB). 10 MB já é folgado e
+      # protege a API contra uploads abusivos.
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  ai:
+    openai:
+      # A chave vem SEMPRE de variável de ambiente; nunca a grave no repositório.
+      # O valor padrão existe só para a aplicação subir sem chave: nesse caso os endpoints de
+      # orçamento (/api/v1/despesas, /extrato...) funcionam e apenas os endpoints de IA falham
+      # (com 502 e mensagem clara).
+      api-key: ${OPENAI_API_KEY:chave-nao-configurada}
+      audio:
+        transcription:
+          # Modelo de Speech-to-Text. Alternativas documentadas: whisper-1, gpt-4o-transcribe.
+          model: ${OPENAI_TRANSCRIPTION_MODEL:gpt-4o-mini-transcribe}
+      chat:
+        options:
+          # Modelo que conversa e aciona as ferramentas (Tool Calling). Precisa suportar function calling.
+          model: ${OPENAI_CHAT_MODEL:gpt-4o-mini}
+          # Temperatura baixa = respostas mais previsíveis, o que importa quando o modelo precisa extrair
+          # valores e datas corretamente. ATENÇÃO: modelos da família GPT-5 rejeitam este parâmetro;
+          # se trocar para eles, apague esta linha.
+          temperature: 0.2
+
+app:
+  # Fuso usado para decidir o que é "hoje" ao interpretar comandos como "gastei 30 ontem".
+  fuso-horario: America/Sao_Paulo
+  # Carrega categorias e lançamentos de exemplo ao subir, para você testar sem digitar nada.
+  dados-demo: true
+
+logging:
+  level:
+    br.com.orcamentoia: INFO
+    # Troque para DEBUG para ver as chamadas de ferramentas feitas pelo modelo.
+    org.springframework.ai: INFO

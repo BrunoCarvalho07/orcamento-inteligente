@@ -1,0 +1,13 @@
+# Perfil "postgres": sobrescreve apenas o que muda em relação ao application.yml.
+# Exemplo de execução:
+#   docker run -d --name pg-orcamento -e POSTGRES_PASSWORD=orcamento -e POSTGRES_DB=orcamento -p 5432:5432 postgres:16
+#   ./mvnw spring-boot:run -Dspring-boot.run.profiles=postgres
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/orcamento}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:orcamento}
+
+app:
+  # Com banco persistente não queremos inserir dados de demonstração automaticamente.
+  dados-demo: false

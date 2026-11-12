@@ -1,0 +1,8 @@
+target/
+.idea/
+*.iml
+.vscode/
+.DS_Store
+*.log
+# Nunca versione chaves de API.
+.env
